@@ -1,0 +1,297 @@
+Here's the updated website code to meet the described requirements:
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión de Enlaces</title>
+  <style>
+    /* General Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #f7f9fc, #dde4ed);
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 800px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: #0066cc;
+    }
+
+    #admin-section {
+      margin-bottom: 2rem;
+    }
+
+    label {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border 0.3s ease;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #0066cc;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      padding: 0.8rem 1.5rem;
+      background-color: #0066cc;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #004c99;
+      transform: translateY(-2px);
+    }
+
+    #password-prompt {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    #link-form {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .link-container {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .link-card {
+      padding: 1rem;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .iframe-wrapper {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%; /* Aspect ratio 16:9 */
+    }
+
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .link-description {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #444;
+    }
+
+    .button-group {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .edit-button {
+      background-color: #ffcc00;
+      color: white;
+    }
+
+    .delete-button {
+      background-color: #ff4d4f;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sistema de Gestión de Enlaces</h1>
+
+    <div id="admin-section">
+      <form id="password-prompt">
+        <label for="password">Contraseña de administrador:</label>
+        <input type="password" id="password" placeholder="Ingresa tu contraseña" />
+        <button type="button" id="password-submit">Acceder</button>
+      </form>
+
+      <form id="link-form">
+        <label for="link-url">URL del enlace:</label>
+        <input type="url" id="link-url" placeholder="Ingresa un enlace válido" required />
+
+        <label for="link-description">Descripción:</label>
+        <textarea id="link-description" placeholder="Escribe una descripción para el enlace" required></textarea>
+
+        <button id="add-link" type="submit">Agregar Enlace</button>
+      </form>
+    </div>
+
+    <div class="link-container" id="links-container"></div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "admin123"; // Cambia esta contraseña según necesites.
+
+    const passwordPrompt = document.getElementById("password-prompt");
+    const passwordInput = document.getElementById("password");
+    const passwordSubmitButton = document.getElementById("password-submit");
+    const linkForm = document.getElementById("link-form");
+
+    const linksContainer = document.getElementById("links-container");
+    const linkUrlInput = document.getElementById("link-url");
+    const linkDescriptionInput = document.getElementById("link-description");
+
+    // Validar si la URL es un enlace de YouTube.
+    function isYouTubeUrl(url) {
+      const ytRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+      return ytRegex.test(url) ? RegExp.$4 : null; // Retorna el ID del video si es válido.
+    }
+
+    // Crear una tarjeta para un enlace.
+    function createLinkCard(url, description) {
+      const linkCard = document.createElement("div");
+      linkCard.className = "link-card";
+
+      const youTubeId = isYouTubeUrl(url);
+
+      if (youTubeId) {
+        // Si es un enlace de YouTube, mostrar un iframe.
+        const iframeWrapper = document.createElement("div");
+        iframeWrapper.className = "iframe-wrapper";
+
+        const iframe = document.createElement("iframe");
+        iframe.src = `https://www.youtube.com/embed/${youTubeId}`;
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+
+        iframeWrapper.appendChild(iframe);
+        linkCard.appendChild(iframeWrapper);
+      } else {
+        // Si no, mostrar un botón de enlace.
+        const linkButton = document.createElement("a");
+        linkButton.href = url;
+        linkButton.textContent = "Ir al Enlace";
+        linkButton.target = "_blank";
+        linkButton.style = "text-decoration: none; color: #0066cc; font-weight: bold;";
+        linkCard.appendChild(linkButton);
+      }
+
+      const descriptionElement = document.createElement("p");
+      descriptionElement.className = "link-description";
+      descriptionElement.textContent = description;
+
+      const buttonGroup = document.createElement("div");
+      buttonGroup.className = "button-group";
+
+      const editButton = document.createElement("button");
+      editButton.className = "edit-button";
+      editButton.textContent = "Editar";
+      editButton.addEventListener("click", () => {
+        const newDescription = prompt("Edita la descripción:", descriptionElement.textContent);
+        if (newDescription !== null) {
+          descriptionElement.textContent = newDescription;
+        }
+      });
+
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "delete-button";
+      deleteButton.textContent = "Eliminar";
+      deleteButton.addEventListener("click", () => {
+        const confirmDelete = confirm("¿Estás seguro que deseas eliminar este enlace?");
+        if (confirmDelete) {
+          linkCard.remove();
+        }
+      });
+
+      buttonGroup.appendChild(editButton);
+      buttonGroup.appendChild(deleteButton);
+
+      linkCard.appendChild(descriptionElement);
+      linkCard.appendChild(buttonGroup);
+
+      return linkCard;
+    }
+
+    // Verificar la contraseña de administrador.
+    passwordSubmitButton.addEventListener("click", () => {
+      if (passwordInput.value === ADMIN_PASSWORD) {
+        passwordPrompt.style.display = "none";
+        linkForm.style.display = "flex";
+      } else {
+        alert("Contraseña incorrecta. Inténtalo de nuevo.");
+        passwordInput.value = "";
+      }
+    });
+
+    // Manejar el formulario de agregar enlaces.
+    linkForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const url = linkUrlInput.value.trim();
+      const description = linkDescriptionInput.value.trim();
+
+      if (!url || !description) {
+        alert("Por favor, completa ambos campos.");
+        return;
+      }
+
+      const linkCard = createLinkCard(url, description);
+      linksContainer.prepend(linkCard); // Añadir al inicio de la lista.
+
+      // Limpiar campos.
+      linkUrlInput.value = "";
+      linkDescriptionInput.value = "";
+    });
+  </script>
+</body>
+</html>
+```
