@@ -69,6 +69,7 @@
         .video-item {
             margin-top: 20px;
             text-align: center;
+            position: relative;
         }
 
         .video-item iframe {
@@ -87,6 +88,22 @@
 
         .download-link:hover {
             text-decoration: underline;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .delete-button:hover {
+            background: #c82333;
         }
 
         #error-message {
@@ -182,9 +199,16 @@
                 downloadAnchor.classList.add('download-link');
                 downloadAnchor.target = "_blank";
 
-                // Append the iframe and download link to the video item
+                // Create delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('delete-button');
+                deleteButton.textContent = 'Eliminar';
+                deleteButton.onclick = () => deleteVideo(videoId, downloadLink);
+
+                // Append the iframe, download link, and delete button to the video item
                 videoItem.appendChild(iframe);
                 videoItem.appendChild(downloadAnchor);
+                videoItem.appendChild(deleteButton);
 
                 // Get existing videos from localStorage or initialize as empty array
                 const videos = JSON.parse(localStorage.getItem('videos')) || [];
@@ -233,21 +257,25 @@
                 downloadAnchor.classList.add('download-link');
                 downloadAnchor.target = "_blank";
 
-                // Append the iframe and download link to the video item
+                // Create delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('delete-button');
+                deleteButton.textContent = 'Eliminar';
+                deleteButton.onclick = () => deleteVideo(video.youtubeId, video.downloadLink);
+
+                // Append the iframe, download link, and delete button to the video item
                 videoItem.appendChild(iframe);
                 videoItem.appendChild(downloadAnchor);
+                videoItem.appendChild(deleteButton);
 
                 // Append the video item to the list
                 videosContainer.appendChild(videoItem);
             });
         }
 
-        // Extract the video ID from a YouTube URL
-        function extractYouTubeID(url) {
-            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-            const match = url.match(regex);
-            return match ? match[1] : null;
-        }
-    </script>
-</body>
-</html>
+        // Delete a video from the list
+        function deleteVideo(youtubeId, downloadLink) {
+            const videos = JSON.parse(localStorage.getItem('videos')) || [];
+
+            // Filter out the video to delete
+            const updatedVideos = videos.filter(video => !(video.youtube
