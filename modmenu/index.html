@@ -81,42 +81,43 @@
 
             // Iterar sobre los videos y mostrarlos
             videos.forEach(video => {
-                const videoContainer = document.createElement('div');
-                videoContainer.classList.add('video-container');
+                if (isValidVideo(video)) {
+                    const videoContainer = document.createElement('div');
+                    videoContainer.classList.add('video-container');
 
-                // Incrustar el video de YouTube
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
-                iframe.setAttribute('allowfullscreen', '');
-                videoContainer.appendChild(iframe);
+                    // Incrustar el video de YouTube
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
+                    iframe.setAttribute('allowfullscreen', '');
+                    videoContainer.appendChild(iframe);
 
-                // Agregar enlace de descarga
-                const downloadLink = document.createElement('a');
-                downloadLink.href = video.downloadLink;
-                downloadLink.classList.add('download-link');
-                downloadLink.textContent = 'Descargar archivo relacionado';
-                downloadLink.setAttribute('download', '');
-                videoContainer.appendChild(downloadLink);
+                    // Agregar enlace de descarga
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = video.downloadLink;
+                    downloadLink.classList.add('download-link');
+                    downloadLink.textContent = 'Descargar archivo relacionado';
+                    downloadLink.setAttribute('download', '');
+                    videoContainer.appendChild(downloadLink);
 
-                // Añadir el contenedor del video al main
-                videoList.appendChild(videoContainer);
+                    // Añadir el contenedor del video al main
+                    videoList.appendChild(videoContainer);
+                }
             });
+        }
+
+        // Función para verificar si un video es válido
+        function isValidVideo(video) {
+            return video && video.youtubeId && video.downloadLink && isValidUrl(video.downloadLink);
+        }
+
+        // Función para verificar si un enlace es válido
+        function isValidUrl(url) {
+            const regex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+            return regex.test(url);
         }
 
         // Cargar videos al cargar la página
         loadVideos();
-
-        // Función para agregar un nuevo video
-        function addVideo(youtubeId, downloadLink) {
-            const videos = JSON.parse(localStorage.getItem('videos')) || [];
-            videos.push({ youtubeId, downloadLink });
-            localStorage.setItem('videos', JSON.stringify(videos));
-            loadVideos(); // Recargar la lista de videos
-        }
-
-        // Simulación de agregar un video
-        // Esto se hace cuando el administrador sube un video desde el panel de administración
-        addVideo('dQw4w9WgXcQ', 'https://example.com/download-file'); // Ejemplo de cómo agregar un video
     </script>
 </body>
 </html>
