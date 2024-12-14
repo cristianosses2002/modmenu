@@ -186,16 +186,25 @@
                 videoItem.appendChild(iframe);
                 videoItem.appendChild(downloadAnchor);
 
-                // Add the video item to the public video list
+                // Get existing videos from localStorage or initialize as empty array
                 const videos = JSON.parse(localStorage.getItem('videos')) || [];
-                videos.push({ youtubeId: videoId, downloadLink });
-                localStorage.setItem('videos', JSON.stringify(videos));
 
-                // Reset the form fields
-                document.getElementById('admin-form').reset();
+                // Check if the video already exists
+                if (!videos.some(video => video.youtubeId === videoId && video.downloadLink === downloadLink)) {
+                    // Add new video to the list
+                    videos.push({ youtubeId: videoId, downloadLink });
 
-                // Reload the video list
-                loadVideos();
+                    // Save updated list to localStorage
+                    localStorage.setItem('videos', JSON.stringify(videos));
+
+                    // Reset the form fields
+                    document.getElementById('admin-form').reset();
+
+                    // Reload the video list
+                    loadVideos();
+                } else {
+                    validationError.style.display = 'block'; // Show error if video already exists
+                }
             } else {
                 validationError.style.display = 'block'; // Show error for invalid link
             }
@@ -207,7 +216,8 @@
             const videosContainer = document.getElementById('videos-container');
             videosContainer.innerHTML = ''; // Clear the existing video list
 
-            videos.forEach(video => {
+            // Ensure only valid videos are loaded
+            videos.filter(video => video.youtubeId && video.downloadLink).forEach(video => {
                 const videoItem = document.createElement('div');
                 videoItem.classList.add('video-item');
 
