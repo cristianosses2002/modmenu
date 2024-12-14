@@ -265,17 +265,4 @@
 
                 // Append the iframe, download link, and delete button to the video item
                 videoItem.appendChild(iframe);
-                videoItem.appendChild(downloadAnchor);
-                videoItem.appendChild(deleteButton);
-
-                // Append the video item to the list
-                videosContainer.appendChild(videoItem);
-            });
-        }
-
-        // Delete a video from the list
-        function deleteVideo(youtubeId, downloadLink) {
-            const videos = JSON.parse(localStorage.getItem('videos')) || [];
-
-            // Filter out the video to delete
-            const updatedVideos = videos.filter(video => !(video.youtube
+   
