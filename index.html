@@ -7,15 +7,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (/Android/i.test(navigator.userAgent)) {
-                window.location.href = 'modmenu/index.html'; // Redirige a modmenu para usuarios Android
+                window.location.href = 'modmenu/index.html'; // Redirige automáticamente a modmenu para usuarios Android
             } else {
-                var accessKey = prompt("Introduce la clave de acceso para el Panel:"); // Solicita la clave de acceso para el panel
-                if (accessKey === "tu_clave_secreta") { // Compara la clave ingresada
-                    window.location.href = 'Panel/index.html'; // Redirige a Panel si la clave es correcta
-                } else {
-                    alert("Acceso denegado. Clave incorrecta.");
-                    // Aquí puedes redirigir a otra página si lo prefieres
-                }
+                // No se redirige automáticamente a Panel. Solo se puede acceder escribiendo la URL manualmente.
+                alert("Puedes acceder al Panel escribiendo la URL directamente en el navegador.");
             }
         });
     </script>
