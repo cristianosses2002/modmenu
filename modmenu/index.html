@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -64,47 +65,58 @@
     </main>
 
     <script>
-        // Simulación de una petición a un backend/API
         const videoList = document.getElementById('video-list');
 
-        async function fetchVideos() {
-            try {
-                const response = await fetch('https://example.com/videos.json'); // Simula un archivo JSON alojado.
-                const videos = await response.json();
+        // Función para cargar los videos desde el localStorage
+        function loadVideos() {
+            const videos = JSON.parse(localStorage.getItem('videos')) || [];
 
-                // Limpia el contenido actual
-                videoList.innerHTML = '';
+            // Limpiar el contenido actual
+            videoList.innerHTML = '';
 
-                videos.forEach(video => {
-                    // Crear contenedor para cada video
-                    const videoContainer = document.createElement('div');
-                    videoContainer.classList.add('video-container');
-
-                    // Incrustar el video de YouTube
-                    const iframe = document.createElement('iframe');
-                    iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
-                    iframe.setAttribute('allowfullscreen', '');
-                    videoContainer.appendChild(iframe);
-
-                    // Agregar enlace de descarga
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = video.downloadLink;
-                    downloadLink.classList.add('download-link');
-                    downloadLink.textContent = 'Descargar archivo relacionado';
-                    downloadLink.setAttribute('download', '');
-                    videoContainer.appendChild(downloadLink);
-
-                    // Añadir el contenedor del video al main
-                    videoList.appendChild(videoContainer);
-                });
-            } catch (error) {
-                videoList.innerHTML = '<p>Error al cargar los videos. Intente nuevamente más tarde.</p>';
+            if (videos.length === 0) {
+                videoList.innerHTML = '<p>No hay videos disponibles.</p>';
+                return;
             }
+
+            // Iterar sobre los videos y mostrarlos
+            videos.forEach(video => {
+                const videoContainer = document.createElement('div');
+                videoContainer.classList.add('video-container');
+
+                // Incrustar el video de YouTube
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
+                iframe.setAttribute('allowfullscreen', '');
+                videoContainer.appendChild(iframe);
+
+                // Agregar enlace de descarga
+                const downloadLink = document.createElement('a');
+                downloadLink.href = video.downloadLink;
+                downloadLink.classList.add('download-link');
+                downloadLink.textContent = 'Descargar archivo relacionado';
+                downloadLink.setAttribute('download', '');
+                videoContainer.appendChild(downloadLink);
+
+                // Añadir el contenedor del video al main
+                videoList.appendChild(videoContainer);
+            });
         }
 
-        // Actualizar lista de videos cada 30 segundos
-        fetchVideos();
-        setInterval(fetchVideos, 30000);
+        // Cargar videos al cargar la página
+        loadVideos();
+
+        // Función para agregar un nuevo video
+        function addVideo(youtubeId, downloadLink) {
+            const videos = JSON.parse(localStorage.getItem('videos')) || [];
+            videos.push({ youtubeId, downloadLink });
+            localStorage.setItem('videos', JSON.stringify(videos));
+            loadVideos(); // Recargar la lista de videos
+        }
+
+        // Simulación de agregar un video
+        // Esto se hace cuando el administrador sube un video desde el panel de administración
+        addVideo('dQw4w9WgXcQ', 'https://example.com/download-file'); // Ejemplo de cómo agregar un video
     </script>
 </body>
 </html>
