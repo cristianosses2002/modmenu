@@ -1,7 +1,8 @@
-<html><head><base href="http://example.com/">
+<html lang="en">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Página Pública - Videos y Descargas</title>
+  <title>Página Pública</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,9 +26,10 @@
     }
 
     .video-list, .download-list {
+      margin-top: 20px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 20px;
     }
 
     .item {
@@ -39,80 +41,127 @@
 
     iframe {
       width: 100%;
-      max-width: 600px;
-      aspect-ratio: 16 / 9;
-    }
-
-    .download-item a {
-      text-decoration: none;
-      color: #fff;
-      background: #4a90e2;
-      padding: 10px 20px;
+      border: none;
       border-radius: 5px;
-      display: inline-block;
-      transition: background 0.2s ease;
     }
 
-    .download-item a:hover {
-      background: #357ab8;
+    a {
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      background-color: #4a90e2;
+      padding: 8px 15px;
+      border-radius: 4px;
+      text-align: center;
+      transition: background 0.3s ease;
+    }
+
+    a:hover {
+      background-color: #357abd;
+    }
+
+    .error-message {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      iframe {
+        max-height: 300px;
+      }
     }
   </style>
 </head>
 <body>
-<header>
-  <h1>Videos y Descargas Públicas</h1>
-  <p>Explora el contenido disponible a continuación.</p>
-</header>
-<main>
-  <section>
+  <header>
+    <h1>Contenido Público</h1>
+  </header>
+  <main>
     <h2>Videos</h2>
-    <div class="video-list" id="video-list">
-      <!-- Videos dynamically added here -->
+    <div id="videos" class="video-list">
+      <!-- Lazy loading videos will appear here -->
     </div>
+
     <h2>Descargas</h2>
-    <div class="download-list" id="download-list">
-      <!-- Download links dynamically added here -->
+    <div id="downloads" class="download-list">
+      <!-- Lazy loading downloads will appear here -->
     </div>
-  </section>
-</main>
-<script>
-  const videoList = document.getElementById("video-list");
-  const downloadList = document.getElementById("download-list");
 
-  // Fetch content from API (e.g., backend server)
-  async function fetchContent() {
-    try {
-      const response = await fetch("https://example.com/api/content"); // Replace with actual endpoint
-      const { videos, downloads } = await response.json();
-      
-      // Clear existing lists
-      videoList.innerHTML = "";
-      downloadList.innerHTML = "";
+    <div id="error" class="error-message"></div>
+  </main>
 
-      // Populate video list
-      videos.forEach(videoId => {
-        const videoItem = document.createElement("div");
-        videoItem.classList.add("item");
-        videoItem.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
-        videoList.appendChild(videoItem);
-      });
+  <script>
+    async function fetchContent() {
+      try {
+        const response = await fetch("/api/content");
+        if (!response.ok) throw new Error("Error al obtener los datos del servidor.");
 
-      // Populate download list
-      downloads.forEach(download => {
-        const downloadItem = document.createElement("div");
-        downloadItem.classList.add("item", "download-item");
-        downloadItem.innerHTML = `<p>${download.description}</p><a href="${download.url}" target="_blank">Descargar</a>`;
-        downloadList.appendChild(downloadItem);
-      });
-    } catch (error) {
-      console.error("Error fetching content:", error);
+        const content = await response.json();
+        const videosContainer = document.getElementById("videos");
+        const downloadsContainer = document.getElementById("downloads");
+        const errorContainer = document.getElementById("error");
+
+        // Clear any error messages
+        errorContainer.textContent = "";
+
+        // Lazy load videos
+        content.videos.forEach(video => {
+          // Validate that the video URL comes from YouTube
+          const url = new URL(video.video_url);
+          if (!["youtube.com", "youtu.be"].includes(url.hostname)) {
+            console.warn(`URL no válida: ${video.video_url}`);
+            return;
+          }
+          
+          const videoId = url.hostname === "youtu.be" ? url.pathname.substring(1) : url.searchParams.get("v");
+          if (!videoId) {
+            console.warn(`Video ID no encontrada en la URL: ${video.video_url}`);
+            return;
+          }
+
+          const videoItem = document.createElement("div");
+          videoItem.classList.add("item");
+          videoItem.innerHTML = `
+            <iframe 
+              data-src="https://www.youtube.com/embed/${videoId}" 
+              allowfullscreen></iframe>`;
+          videosContainer.appendChild(videoItem);
+        });
+
+        // Lazy load downloads
+        content.downloads.forEach(download => {
+          const downloadItem = document.createElement("div");
+          downloadItem.classList.add("item");
+          downloadItem.innerHTML = `
+            <p>${download.description}</p>
+            <a href="${download.download_url}" target="_blank">Descargar</a>`;
+          downloadsContainer.appendChild(downloadItem);
+        });
+
+        // Implement lazy loading using IntersectionObserver
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && entry.target.tagName === "IFRAME") {
+              const iframe = entry.target;
+              iframe.src = iframe.dataset.src; // Load the iframe source
+              observer.unobserve(iframe);
+            }
+          });
+        });
+
+        document.querySelectorAll("iframe[data-src]").forEach(iframe => {
+          observer.observe(iframe);
+        });
+
+      } catch (error) {
+        const errorContainer = document.getElementById("error");
+        errorContainer.textContent = "Se produjo un error al cargar el contenido. Por favor, intenta nuevamente.";
+        console.error("Error al cargar el contenido:", error);
+      }
     }
-  }
 
-  // Load content initially
-  fetchContent();
-
-  // Optionally, set up WebSocket/Server-Sent Events to dynamically refresh
-</script>
+    fetchContent();
+  </script>
 </body>
 </html>
