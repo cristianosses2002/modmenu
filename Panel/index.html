@@ -1,0 +1,206 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Panel de Administración</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; 
+            padding: 0;
+            background: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #auth-container, #admin-panel, #video-list {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        #auth-container {
+            text-align: center;
+        }
+
+        #auth-container input {
+            padding: 8px;
+            margin: 10px 0;
+            width: 90%;
+        }
+
+        #auth-container button, form button {
+            padding: 10px 20px;
+            color: white;
+            background: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #auth-container button:hover, form button:hover {
+            background: #0056b3;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        form input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #admin-panel, #video-list {
+            display: none; /* Hidden by default */
+        }
+
+        .video-item {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .video-item iframe {
+            width: 100%;
+            border: none;
+            height: 250px;
+        }
+
+        .download-link {
+            display: block;
+            margin-top: 10px;
+            color: #007BFF;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .download-link:hover {
+            text-decoration: underline;
+        }
+
+        #error-message {
+            color: red;
+            display: none;
+        }
+
+        #validation-error {
+            color: #dc3545;
+            display: none;
+            font-size: 14px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div id="auth-container">
+        <h2>Acceso al Panel</h2>
+        <p>💼 Ingresa la clave de administrador para acceder al panel:</p>
+        <input type="password" id="admin-password" placeholder="Contraseña">
+        <button onclick="authenticate()">Entrar</button>
+        <p id="error-message">⚠️ Contraseña incorrecta. Inténtalo de nuevo.</p>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel">
+        <h2>Panel de Administración</h2>
+        <form id="admin-form">
+            <input type="text" id="youtube-link" placeholder="Enlace de YouTube" required>
+            <input type="text" id="download-link" placeholder="Enlace de Descarga" required>
+            <button type="submit">Agregar Video</button>
+        </form>
+        <p id="validation-error">⚠️ Por favor, ingresa un enlace válido de YouTube.</p>
+    </div>
+
+    <!-- Public Video List -->
+    <div id="video-list">
+        <h2>Videos Disponibles</h2>
+        <div id="videos-container"></div>
+    </div>
+
+    <script>
+        // Predefined admin password
+        const ADMIN_PASSWORD = "admin123"; // Update to your own secure password
+
+        // Authenticate user
+        function authenticate() {
+            const enteredPassword = document.getElementById('admin-password').value;
+            const authError = document.getElementById('error-message');
+
+            if (enteredPassword === ADMIN_PASSWORD) {
+                // Hide the authentication screen and show the admin panel
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('video-list').style.display = 'block';
+            } else {
+                authError.style.display = 'block'; // Password was incorrect
+            }
+        }
+
+        // Admin Form Event Listener
+        document.getElementById('admin-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const youtubeLink = document.getElementById('youtube-link').value;
+            const downloadLink = document.getElementById('download-link').value;
+            const videosContainer = document.getElementById('videos-container');
+            const validationError = document.getElementById('validation-error');
+
+            // Extract the YouTube video ID
+            const videoId = extractYouTubeID(youtubeLink);
+
+            if (videoId) {
+                validationError.style.display = 'none';
+
+                // Create a new video item
+                const videoItem = document.createElement('div');
+                videoItem.classList.add('video-item');
+
+                // Embed the YouTube video
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                iframe.allowFullscreen = true;
+
+                // Create the download link
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.href = downloadLink;
+                downloadAnchor.textContent = "Descargar archivo";
+                downloadAnchor.classList.add('download-link');
+                downloadAnchor.target = "_blank";
+
+                // Append the iframe and download link to the video item
+                videoItem.appendChild(iframe);
+                videoItem.appendChild(downloadAnchor);
+
+                // Add the video item to the public video list
+                videosContainer.appendChild(videoItem);
+
+                // Reset the form fields
+                document.getElementById('admin-form').reset();
+            } else {
+                validationError.style.display = 'block'; // Show error for invalid link
+            }
+        });
+
+        // Extract the video ID from a YouTube URL
+        function extractYouTubeID(url) {
+            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+    </script>
+</body>
+</html>
