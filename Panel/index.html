@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -145,6 +146,7 @@
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'block';
                 document.getElementById('video-list').style.display = 'block';
+                loadVideos(); // Load videos after authentication
             } else {
                 authError.style.display = 'block'; // Password was incorrect
             }
@@ -156,7 +158,6 @@
 
             const youtubeLink = document.getElementById('youtube-link').value;
             const downloadLink = document.getElementById('download-link').value;
-            const videosContainer = document.getElementById('videos-container');
             const validationError = document.getElementById('validation-error');
 
             // Extract the YouTube video ID
@@ -186,14 +187,50 @@
                 videoItem.appendChild(downloadAnchor);
 
                 // Add the video item to the public video list
-                videosContainer.appendChild(videoItem);
+                const videos = JSON.parse(localStorage.getItem('videos')) || [];
+                videos.push({ youtubeId: videoId, downloadLink });
+                localStorage.setItem('videos', JSON.stringify(videos));
 
                 // Reset the form fields
                 document.getElementById('admin-form').reset();
+
+                // Reload the video list
+                loadVideos();
             } else {
                 validationError.style.display = 'block'; // Show error for invalid link
             }
         });
+
+        // Load videos from localStorage
+        function loadVideos() {
+            const videos = JSON.parse(localStorage.getItem('videos')) || [];
+            const videosContainer = document.getElementById('videos-container');
+            videosContainer.innerHTML = ''; // Clear the existing video list
+
+            videos.forEach(video => {
+                const videoItem = document.createElement('div');
+                videoItem.classList.add('video-item');
+
+                // Embed the YouTube video
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
+                iframe.allowFullscreen = true;
+
+                // Create the download link
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.href = video.downloadLink;
+                downloadAnchor.textContent = "Descargar archivo";
+                downloadAnchor.classList.add('download-link');
+                downloadAnchor.target = "_blank";
+
+                // Append the iframe and download link to the video item
+                videoItem.appendChild(iframe);
+                videoItem.appendChild(downloadAnchor);
+
+                // Append the video item to the list
+                videosContainer.appendChild(videoItem);
+            });
+        }
 
         // Extract the video ID from a YouTube URL
         function extractYouTubeID(url) {
