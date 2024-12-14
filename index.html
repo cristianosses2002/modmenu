@@ -1,167 +1,20 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Página Pública</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      color: #333;
-      background: #f9f9f9;
-    }
-
-    header {
-      background-color: #4a90e2;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-    main {
-      padding: 20px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .video-list, .download-list {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .item {
-      background: white;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    iframe {
-      width: 100%;
-      border: none;
-      border-radius: 5px;
-    }
-
-    a {
-      display: inline-block;
-      text-decoration: none;
-      color: white;
-      background-color: #4a90e2;
-      padding: 8px 15px;
-      border-radius: 4px;
-      text-align: center;
-      transition: background 0.3s ease;
-    }
-
-    a:hover {
-      background-color: #357abd;
-    }
-
-    .error-message {
-      color: red;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      iframe {
-        max-height: 300px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redireccionando...</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var userPanel = prompt("Introduce el panel: ModMenus o Panel"); // Pide al usuario que ingrese el panel
+            if (/Android/i.test(navigator.userAgent)) {
+                window.location.href = userPanel + '/index.html'; // Redirige a la URL especificada
+            } else {
+                window.location.href = userPanel + '/index.html'; // Redirige a la URL especificada
+            }
+        });
+    </script>
 </head>
 <body>
-  <header>
-    <h1>Contenido Público</h1>
-  </header>
-  <main>
-    <h2>Videos</h2>
-    <div id="videos" class="video-list">
-      <!-- Lazy loading videos will appear here -->
-    </div>
-
-    <h2>Descargas</h2>
-    <div id="downloads" class="download-list">
-      <!-- Lazy loading downloads will appear here -->
-    </div>
-
-    <div id="error" class="error-message"></div>
-  </main>
-
-  <script>
-    async function fetchContent() {
-      try {
-        const response = await fetch("/api/content");
-        if (!response.ok) throw new Error("Error al obtener los datos del servidor.");
-
-        const content = await response.json();
-        const videosContainer = document.getElementById("videos");
-        const downloadsContainer = document.getElementById("downloads");
-        const errorContainer = document.getElementById("error");
-
-        // Clear any error messages
-        errorContainer.textContent = "";
-
-        // Lazy load videos
-        content.videos.forEach(video => {
-          // Validate that the video URL comes from YouTube
-          const url = new URL(video.video_url);
-          if (!["youtube.com", "youtu.be"].includes(url.hostname)) {
-            console.warn(`URL no válida: ${video.video_url}`);
-            return;
-          }
-          
-          const videoId = url.hostname === "youtu.be" ? url.pathname.substring(1) : url.searchParams.get("v");
-          if (!videoId) {
-            console.warn(`Video ID no encontrada en la URL: ${video.video_url}`);
-            return;
-          }
-
-          const videoItem = document.createElement("div");
-          videoItem.classList.add("item");
-          videoItem.innerHTML = `
-            <iframe 
-              data-src="https://www.youtube.com/embed/${videoId}" 
-              allowfullscreen></iframe>`;
-          videosContainer.appendChild(videoItem);
-        });
-
-        // Lazy load downloads
-        content.downloads.forEach(download => {
-          const downloadItem = document.createElement("div");
-          downloadItem.classList.add("item");
-          downloadItem.innerHTML = `
-            <p>${download.description}</p>
-            <a href="${download.download_url}" target="_blank">Descargar</a>`;
-          downloadsContainer.appendChild(downloadItem);
-        });
-
-        // Implement lazy loading using IntersectionObserver
-        const observer = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting && entry.target.tagName === "IFRAME") {
-              const iframe = entry.target;
-              iframe.src = iframe.dataset.src; // Load the iframe source
-              observer.unobserve(iframe);
-            }
-          });
-        });
-
-        document.querySelectorAll("iframe[data-src]").forEach(iframe => {
-          observer.observe(iframe);
-        });
-
-      } catch (error) {
-        const errorContainer = document.getElementById("error");
-        errorContainer.textContent = "Se produjo un error al cargar el contenido. Por favor, intenta nuevamente.";
-        console.error("Error al cargar el contenido:", error);
-      }
-    }
-
-    fetchContent();
-  </script>
 </body>
 </html>
