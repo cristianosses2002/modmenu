@@ -6,11 +6,16 @@
     <title>Redireccionando...</title>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var userPanel = prompt("Introduce el panel: ModMenus o Panel"); // Pide al usuario que ingrese el panel
             if (/Android/i.test(navigator.userAgent)) {
-                window.location.href = userPanel + '/index.html'; // Redirige a la URL especificada
+                window.location.href = 'modmenu/index.html'; // Redirige a modmenu para usuarios Android
             } else {
-                window.location.href = userPanel + '/index.html'; // Redirige a la URL especificada
+                var accessKey = prompt("Introduce la clave de acceso para el Panel:"); // Solicita la clave de acceso para el panel
+                if (accessKey === "tu_clave_secreta") { // Compara la clave ingresada
+                    window.location.href = 'Panel/index.html'; // Redirige a Panel si la clave es correcta
+                } else {
+                    alert("Acceso denegado. Clave incorrecta.");
+                    // Aquí puedes redirigir a otra página si lo prefieres
+                }
             }
         });
     </script>
