@@ -67,9 +67,6 @@
     <script>
         const videoList = document.getElementById('video-list');
 
-        // Limpiar el localStorage cada vez que se carga la página para eliminar videos previos
-        localStorage.removeItem('videos');
-
         // Función para cargar los videos desde el localStorage
         function loadVideos() {
             const videos = JSON.parse(localStorage.getItem('videos')) || [];
