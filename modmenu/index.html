@@ -253,7 +253,7 @@
                 return;
             }
 
-            videos.forEach((video) => {
+            videos.forEach((video, index) => {
                 const videoCard = document.createElement('div');
                 videoCard.classList.add('video-card');
 
@@ -283,7 +283,6 @@
                 downloadButton.href = video.downloadLink;
                 downloadButton.classList.add('download-button');
                 downloadButton.textContent = languageContent[languageMenu.value].downloadButton;
-                downloadButton.setAttribute('download', '');
                 videoContent.appendChild(downloadButton);
 
                 videoCard.appendChild(videoPlayer);
@@ -292,25 +291,8 @@
             });
         }
 
-        // Function to upload a new video (simulate with localStorage)
-        function uploadVideo(youtubeId, description, downloadLink) {
-            const videos = JSON.parse(localStorage.getItem('videos')) || [];
-            const newVideo = {
-                youtubeId: youtubeId,
-                description: description,
-                downloadLink: downloadLink
-            };
-            videos.push(newVideo);
-            localStorage.setItem('videos', JSON.stringify(videos));
-
-            loadVideos(); // Reload the videos to show the new one
-        }
-
-        // Example of how you can upload a video
-        uploadVideo('dQw4w9WgXcQ', 'Este es un video de ejemplo', 'https://www.example.com/video.mp4');
-
-        // Load videos initially
-        loadVideos();
+        // Load videos on page load
+        window.onload = loadVideos;
     </script>
 </body>
 </html>
