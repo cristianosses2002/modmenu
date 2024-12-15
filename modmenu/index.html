@@ -1,136 +1,303 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="es"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Videos</title>
+    <title>Minimalista, Inspirado en Apple</title>
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f9;
+            background-color: #f5f5f5; /* Suave fondo de página */
+            color: #333333;
+            overflow-x: hidden;
+            line-height: 1.5;
         }
+
+        /* Header */
         header {
-            background-color: #6200ea;
-            color: white;
-            text-align: center;
-            padding: 1rem;
-        }
-        main {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 10px;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        .video-container {
-            margin-bottom: 20px;
-        }
-        iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 315px;
-            border: none;
-            border-radius: 8px;
-        }
-        .download-link {
-            display: block;
-            margin-top: 10px;
-            background-color: #6200ea;
-            color: white;
-            text-decoration: none;
             text-align: center;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 2rem 1rem;
+            background: rgba(255, 255, 255, 0); /* Transparencia inicial */
+            z-index: 1000;
+            transition: all 0.5s ease-in-out;
+        }
+
+        header.scrolled {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        header h1 {
+            font-size: 3rem;
             font-weight: bold;
+            color: #333333;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            margin: 0;
+            transition: opacity 0.5s ease-in-out;
         }
-        .download-link:hover {
-            background-color: #3700b3;
+
+        header p {
+            font-size: 1.1rem;
+            color: #666666;
+            margin: 0;
         }
+
+        header p,
+        header h1 {
+            opacity: 1;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 8rem auto 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Video Card */
+        .video-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            margin: 2rem auto;
+            max-width: 70%;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        .video-card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .video-player {
+            background: #000;
+            position: relative;
+            padding-top: 56.25%; /* Aspecto 16:9 */
+        }
+
+        .video-player iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-content {
+            padding: 2rem;
+            text-align: center;
+        }
+
         .video-description {
-            margin-top: 10px;
-            color: #555;
-            font-size: 14px;
+            font-size: 1.4rem;
+            color: #444444;
+            margin: 1rem 0;
         }
-        @media (max-width: 600px) {
-            iframe {
-                height: 200px;
+
+        .download-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .download-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 1rem;
+        }
+
+        .language-selector select {
+            font-size: 1rem;
+            padding: 0.5rem;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+        .no-videos {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #888888;
+            margin: 4rem 0;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                overflow: hidden;
             }
         }
     </style>
 </head>
+
 <body>
-    <header>
-        <h1>Lista de Videos</h1>
-        <p>Disfruta el contenido proporcionado por el administrador.</p>
+    <header id="main-header">
+        <h1 id="header-title">Lista de Videos</h1>
+        <p id="header-description">Debajo del Video Está el Link de Descarga</p>
     </header>
+
+    <div class="language-selector">
+        <select id="language-menu" aria-label="Selecciona un idioma">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="pt">Português</option>
+            <option value="ar">العربية</option>
+        </select>
+    </div>
+
     <main id="video-list">
-        <p>Cargando videos...</p>
+        <p class="no-videos" id="no-videos-message">Cargando contenido...</p>
     </main>
 
     <script>
+        const languageContent = {
+            es: {
+                headerTitle: "Lista de Videos",
+                headerDescription: "Debajo del Video Está el Link de Descarga",
+                noVideos: "No hay videos disponibles actualmente.",
+                downloadDescription: "Haz clic para descargar este video.",
+                downloadButton: "Descargar"
+            },
+            en: {
+                headerTitle: "Video List",
+                headerDescription: "Below the Video is the Download Link",
+                noVideos: "No videos available at the moment.",
+                downloadDescription: "Click to download this video.",
+                downloadButton: "Download"
+            },
+            pt: {
+                headerTitle: "Lista de Vídeos",
+                headerDescription: "Abaixo do Vídeo Está o Link de Download",
+                noVideos: "Não há vídeos disponíveis no momento.",
+                downloadDescription: "Clique para baixar este vídeo.",
+                downloadButton: "Baixar"
+            },
+            ar: {
+                headerTitle: "قائمة الفيديوهات",
+                headerDescription: "أسفل الفيديو يوجد رابط التحميل",
+                noVideos: "لا توجد مقاطع فيديو متاحة حاليًا.",
+                downloadDescription: "انقر لتحميل هذا الفيديو.",
+                downloadButton: "تحميل"
+            }
+        };
+
+        const headerTitle = document.getElementById('header-title');
+        const headerDescription = document.getElementById('header-description');
+        const noVideosMessage = document.getElementById('no-videos-message');
+        const languageMenu = document.getElementById('language-menu');
         const videoList = document.getElementById('video-list');
 
-        // Función para cargar los videos desde el localStorage
-        function loadVideos() {
-            const videos = JSON.parse(localStorage.getItem('videos')) || [];
+        // Function to update content based on language
+        function updateLanguage(lang) {
+            const content = languageContent[lang];
+            headerTitle.textContent = content.headerTitle;
+            headerDescription.textContent = content.headerDescription;
+            noVideosMessage.textContent = content.noVideos;
 
-            // Limpiar el contenido actual
-            videoList.innerHTML = '';
+            const videoCards = document.querySelectorAll('.video-card');
 
-            if (videos.length === 0) {
-                videoList.innerHTML = '<p>No hay videos disponibles.</p>';
-                return;
-            }
-
-            // Iterar sobre los videos y mostrarlos
-            videos.forEach(video => {
-                const videoContainer = document.createElement('div');
-                videoContainer.classList.add('video-container');
-
-                // Incrustar el video de YouTube
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
-                iframe.setAttribute('allowfullscreen', '');
-                videoContainer.appendChild(iframe);
-
-                // Agregar enlace de descarga
-                const downloadLink = document.createElement('a');
-                downloadLink.href = video.downloadLink;
-                downloadLink.classList.add('download-link');
-                downloadLink.textContent = 'Descargar archivo relacionado';
-                downloadLink.setAttribute('download', '');
-                videoContainer.appendChild(downloadLink);
-
-                // Mostrar la descripción del video si existe
-                if (video.description) {
-                    const descriptionText = document.createElement('p');
-                    descriptionText.classList.add('video-description');
-                    descriptionText.textContent = video.description;
-                    videoContainer.appendChild(descriptionText);
+            videoCards.forEach((card) => {
+                const downloadButton = card.querySelector('.download-button');
+                const downloadDesc = card.querySelector('.download-description');
+                downloadButton.textContent = content.downloadButton;
+                if (downloadDesc) {
+                    downloadDesc.textContent = content.downloadDescription;
                 }
-
-                // Añadir el contenedor del video al main
-                videoList.appendChild(videoContainer);
             });
         }
 
-        // Cargar videos al cargar la página
-        loadVideos();
+        // Event listener for language selection
+        languageMenu.addEventListener('change', () => {
+            const selectedLanguage = languageMenu.value;
+            updateLanguage(selectedLanguage);
+        });
 
-        // Función para agregar un nuevo video
-        function addVideo(youtubeId, downloadLink, description) {
+        const header = document.getElementById('main-header');
+
+        // Desaparecer el header al hacer scroll
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Function to load videos
+        function loadVideos() {
             const videos = JSON.parse(localStorage.getItem('videos')) || [];
-            videos.push({ youtubeId, downloadLink, description });
-            localStorage.setItem('videos', JSON.stringify(videos));
-            loadVideos(); // Recargar la lista de videos
+            videoList.innerHTML = '';
+
+            if (videos.length === 0) {
+                videoList.innerHTML = `<p class="no-videos">${languageContent[languageMenu.value].noVideos}</p>`;
+                return;
+            }
+
+            videos.forEach((video) => {
+                const videoCard = document.createElement('div');
+                videoCard.classList.add('video-card');
+
+                const videoPlayer = document.createElement('div');
+                videoPlayer.classList.add('video-player');
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
+                iframe.setAttribute('allowfullscreen', '');
+                videoPlayer.appendChild(iframe);
+
+                const videoContent = document.createElement('div');
+                videoContent.classList.add('video-content');
+
+                if (video.description) {
+                    const description = document.createElement('p');
+                    description.classList.add('video-description');
+                    description.textContent = video.description;
+                    videoContent.appendChild(description);
+                }
+
+                const downloadDesc = document.createElement('p');
+                downloadDesc.classList.add('download-description');
+                downloadDesc.textContent = languageContent[languageMenu.value].downloadDescription;
+                videoContent.appendChild(downloadDesc);
+
+                const downloadButton = document.createElement('a');
+                downloadButton.href = video.downloadLink;
+                downloadButton.classList.add('download-button');
+                downloadButton.textContent = languageContent[languageMenu.value].downloadButton;
+                downloadButton.setAttribute('download', '');
+                videoContent.appendChild(downloadButton);
+
+                videoCard.appendChild(videoPlayer);
+                videoCard.appendChild(videoContent);
+                videoList.appendChild(videoCard);
+            });
         }
 
-        // Simulación de agregar un video
-        // Esto se hace cuando el administrador sube un video desde el panel de administración
-        // Aquí es donde agregarías el video desde el panel de administración
-        // addVideo('dQw4w9WgXcQ', 'https://example.com/download-file', 'Descripción del video.');
+        loadVideos();
     </script>
-</body>
-</html>
+
+
+</body></html>
