@@ -1,5 +1,3 @@
-<html><head><base href=""/>
-<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -7,11 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Panel de Administración</title>
     <style>
+        /* Global Styling */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: #f4f4f9;
+            background: linear-gradient(135deg, #f3f4f6, #ffffff);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,10 +20,47 @@
         #auth-container, #admin-panel, #video-list {
             max-width: 600px;
             margin: auto;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
             background: white;
+        }
+
+        h2 {
+            text-align: center;
+            color: #183153;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        button, form button {
+            padding: 12px 24px;
+            color: white;
+            background: #007BFF;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Roboto', Arial, sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover, form button:hover {
+            background: #0056b3;
+        }
+
+        input, textarea {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #007BFF;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0,123,255,0.4);
         }
 
         #auth-container {
@@ -32,35 +68,26 @@
         }
 
         #auth-container input {
-            padding: 8px;
-            margin: 10px 0;
             width: 90%;
+            margin: 10px 0;
         }
 
-        #auth-container button, form button {
-            padding: 10px 20px;
-            color: white;
-            background: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #auth-container button:hover, form button:hover {
-            background: #0056b3;
+        #auth-container button {
+            width: 92%;
         }
 
         form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
-        form input {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        form input, form textarea, form button {
+            width: 100%;
+        }
+
+        #admin-panel, #video-list {
+            margin-bottom: 20px;
         }
 
         #admin-panel, #video-list {
@@ -71,17 +98,28 @@
             margin-top: 20px;
             text-align: center;
             position: relative;
+            overflow: hidden;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .video-item:hover {
+            transform: translateY(-5px);
         }
 
         .video-item iframe {
             width: 100%;
+            height: 300px;
             border: none;
-            height: 250px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
 
         .download-link {
             display: block;
-            margin-top: 10px;
+            margin: 10px auto;
             color: #007BFF;
             text-decoration: none;
             font-size: 16px;
@@ -99,34 +137,41 @@
 
         .delete-button {
             position: absolute;
-            top: 5px;
-            right: 5px;
-            padding: 5px 10px;
+            top: 10px;
+            right: 10px;
+            padding: 8px;
             color: white;
             background-color: #dc3545;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
+            transition: background-color 0.3s ease;
         }
 
         .delete-button:hover {
             background-color: #a71d2a;
         }
 
-        #error-message {
-            color: red;
-            display: none;
-        }
-
-        #validation-error {
+        #error-message, #validation-error {
             color: #dc3545;
             display: none;
             font-size: 14px;
+            margin: 5px 0 0;
         }
 
-        h2 {
-            text-align: center;
+        @media (max-width: 768px) {
+            #auth-container, #admin-panel, #video-list {
+                padding: 20px 15px;
+            }
+
+            #auth-container input, form input, form textarea {
+                font-size: 14px;
+            }
+
+            .video-item iframe {
+                height: 200px;
+            }
         }
     </style>
 </head>
@@ -146,7 +191,7 @@
         <form id="admin-form">
             <input type="text" id="youtube-link" placeholder="Enlace de YouTube" required>
             <input type="text" id="download-link" placeholder="Enlace de Descarga" required>
-            <input type="text" id="description" placeholder="Descripción opcional del video">
+            <textarea id="description" placeholder="Descripción opcional del video" rows="3"></textarea>
             <button type="submit">Agregar Video</button>
         </form>
         <p id="validation-error">⚠️ Por favor, ingresa un enlace válido de YouTube.</p>
@@ -159,26 +204,22 @@
     </div>
 
     <script>
-        // Predefined admin password
-        const ADMIN_PASSWORD = "admin123"; // Update to your own secure password
+        const ADMIN_PASSWORD = "admin123"; // Use your own password
 
-        // Authenticate user
         function authenticate() {
             const enteredPassword = document.getElementById('admin-password').value;
             const authError = document.getElementById('error-message');
 
             if (enteredPassword === ADMIN_PASSWORD) {
-                // Hide the authentication screen and show the admin panel
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'block';
                 document.getElementById('video-list').style.display = 'block';
-                loadVideos(); // Load videos after authentication
+                loadVideos();
             } else {
-                authError.style.display = 'block'; // Password was incorrect
+                authError.style.display = 'block';
             }
         }
 
-        // Admin Form Event Listener
         document.getElementById('admin-form').addEventListener('submit', (event) => {
             event.preventDefault();
 
@@ -187,60 +228,45 @@
             const description = document.getElementById('description').value;
             const validationError = document.getElementById('validation-error');
 
-            // Extract the YouTube video ID
             const videoId = extractYouTubeID(youtubeLink);
 
             if (videoId) {
                 validationError.style.display = 'none';
 
-                // Get existing videos from localStorage or initialize as empty array
                 const videos = JSON.parse(localStorage.getItem('videos')) || [];
 
-                // Check if the video already exists
                 if (!videos.some(video => video.youtubeId === videoId && video.downloadLink === downloadLink)) {
-                    // Add new video to the list
                     videos.push({ youtubeId: videoId, downloadLink, description });
-
-                    // Save updated list to localStorage
                     localStorage.setItem('videos', JSON.stringify(videos));
-
-                    // Reset the form fields
                     document.getElementById('admin-form').reset();
-
-                    // Reload the video list
                     loadVideos();
                 } else {
-                    validationError.style.display = 'block'; // Show error if video already exists
+                    validationError.style.display = 'block';
                 }
             } else {
-                validationError.style.display = 'block'; // Show error for invalid link
+                validationError.style.display = 'block';
             }
         });
 
-        // Load videos from localStorage
         function loadVideos() {
             const videos = JSON.parse(localStorage.getItem('videos')) || [];
             const videosContainer = document.getElementById('videos-container');
-            videosContainer.innerHTML = ''; // Clear the existing video list
+            videosContainer.innerHTML = '';
 
-            // Ensure only valid videos are loaded
-            videos.filter(video => video.youtubeId && video.downloadLink).forEach((video, index) => {
+            videos.forEach((video, index) => {
                 const videoItem = document.createElement('div');
                 videoItem.classList.add('video-item');
 
-                // Embed the YouTube video
                 const iframe = document.createElement('iframe');
                 iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
                 iframe.allowFullscreen = true;
 
-                // Create the download link
                 const downloadAnchor = document.createElement('a');
                 downloadAnchor.href = video.downloadLink;
                 downloadAnchor.textContent = "Descargar archivo";
                 downloadAnchor.classList.add('download-link');
                 downloadAnchor.target = "_blank";
 
-                // Create and append the description text
                 if (video.description) {
                     const descriptionText = document.createElement('p');
                     descriptionText.textContent = video.description;
@@ -248,31 +274,26 @@
                     videoItem.appendChild(descriptionText);
                 }
 
-                // Create the delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = "Eliminar";
                 deleteButton.classList.add('delete-button');
                 deleteButton.onclick = () => deleteVideo(index);
 
-                // Append the iframe, download link, and delete button to the video item
                 videoItem.appendChild(iframe);
                 videoItem.appendChild(downloadAnchor);
                 videoItem.appendChild(deleteButton);
 
-                // Append the video item to the list
                 videosContainer.appendChild(videoItem);
             });
         }
 
-        // Delete video from localStorage
         function deleteVideo(index) {
             const videos = JSON.parse(localStorage.getItem('videos')) || [];
-            videos.splice(index, 1); // Remove video at the specified index
+            videos.splice(index, 1);
             localStorage.setItem('videos', JSON.stringify(videos));
-            loadVideos(); // Reload the updated video list
+            loadVideos();
         }
 
-        // Extract the video ID from a YouTube URL
         function extractYouTubeID(url) {
             const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
             const match = url.match(regex);
