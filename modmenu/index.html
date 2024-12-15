@@ -48,6 +48,11 @@
         .download-link:hover {
             background-color: #3700b3;
         }
+        .video-description {
+            margin-top: 10px;
+            color: #555;
+            font-size: 14px;
+        }
         @media (max-width: 600px) {
             iframe {
                 height: 200px;
@@ -98,6 +103,14 @@
                 downloadLink.setAttribute('download', '');
                 videoContainer.appendChild(downloadLink);
 
+                // Mostrar la descripción del video si existe
+                if (video.description) {
+                    const descriptionText = document.createElement('p');
+                    descriptionText.classList.add('video-description');
+                    descriptionText.textContent = video.description;
+                    videoContainer.appendChild(descriptionText);
+                }
+
                 // Añadir el contenedor del video al main
                 videoList.appendChild(videoContainer);
             });
@@ -107,9 +120,9 @@
         loadVideos();
 
         // Función para agregar un nuevo video
-        function addVideo(youtubeId, downloadLink) {
+        function addVideo(youtubeId, downloadLink, description) {
             const videos = JSON.parse(localStorage.getItem('videos')) || [];
-            videos.push({ youtubeId, downloadLink });
+            videos.push({ youtubeId, downloadLink, description });
             localStorage.setItem('videos', JSON.stringify(videos));
             loadVideos(); // Recargar la lista de videos
         }
@@ -117,7 +130,7 @@
         // Simulación de agregar un video
         // Esto se hace cuando el administrador sube un video desde el panel de administración
         // Aquí es donde agregarías el video desde el panel de administración
-        // addVideo('dQw4w9WgXcQ', 'https://example.com/download-file');
+        // addVideo('dQw4w9WgXcQ', 'https://example.com/download-file', 'Descripción del video.');
     </script>
 </body>
 </html>
