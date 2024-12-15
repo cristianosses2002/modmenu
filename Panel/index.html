@@ -1,3 +1,4 @@
+<html><head><base href=""/>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -92,18 +93,19 @@
 
         .delete-button {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #dc3545;
-            color: white;
-            border: none;
+            top: 5px;
+            right: 5px;
             padding: 5px 10px;
-            cursor: pointer;
+            color: white;
+            background-color: #dc3545;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
         }
 
         .delete-button:hover {
-            background: #c82333;
+            background-color: #a71d2a;
         }
 
         #error-message {
@@ -183,33 +185,6 @@
             if (videoId) {
                 validationError.style.display = 'none';
 
-                // Create a new video item
-                const videoItem = document.createElement('div');
-                videoItem.classList.add('video-item');
-
-                // Embed the YouTube video
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://www.youtube.com/embed/${videoId}`;
-                iframe.allowFullscreen = true;
-
-                // Create the download link
-                const downloadAnchor = document.createElement('a');
-                downloadAnchor.href = downloadLink;
-                downloadAnchor.textContent = "Descargar archivo";
-                downloadAnchor.classList.add('download-link');
-                downloadAnchor.target = "_blank";
-
-                // Create delete button
-                const deleteButton = document.createElement('button');
-                deleteButton.classList.add('delete-button');
-                deleteButton.textContent = 'Eliminar';
-                deleteButton.onclick = () => deleteVideo(videoId, downloadLink);
-
-                // Append the iframe, download link, and delete button to the video item
-                videoItem.appendChild(iframe);
-                videoItem.appendChild(downloadAnchor);
-                videoItem.appendChild(deleteButton);
-
                 // Get existing videos from localStorage or initialize as empty array
                 const videos = JSON.parse(localStorage.getItem('videos')) || [];
 
@@ -241,7 +216,7 @@
             videosContainer.innerHTML = ''; // Clear the existing video list
 
             // Ensure only valid videos are loaded
-            videos.filter(video => video.youtubeId && video.downloadLink).forEach(video => {
+            videos.filter(video => video.youtubeId && video.downloadLink).forEach((video, index) => {
                 const videoItem = document.createElement('div');
                 videoItem.classList.add('video-item');
 
@@ -257,12 +232,36 @@
                 downloadAnchor.classList.add('download-link');
                 downloadAnchor.target = "_blank";
 
-                // Create delete button
+                // Create the delete button
                 const deleteButton = document.createElement('button');
+                deleteButton.textContent = "Eliminar";
                 deleteButton.classList.add('delete-button');
-                deleteButton.textContent = 'Eliminar';
-                deleteButton.onclick = () => deleteVideo(video.youtubeId, video.downloadLink);
+                deleteButton.onclick = () => deleteVideo(index);
 
                 // Append the iframe, download link, and delete button to the video item
                 videoItem.appendChild(iframe);
-   
+                videoItem.appendChild(downloadAnchor);
+                videoItem.appendChild(deleteButton);
+
+                // Append the video item to the list
+                videosContainer.appendChild(videoItem);
+            });
+        }
+
+        // Delete video from localStorage
+        function deleteVideo(index) {
+            const videos = JSON.parse(localStorage.getItem('videos')) || [];
+            videos.splice(index, 1); // Remove video at the specified index
+            localStorage.setItem('videos', JSON.stringify(videos));
+            loadVideos(); // Reload the updated video list
+        }
+
+        // Extract the video ID from a YouTube URL
+        function extractYouTubeID(url) {
+            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+    </script>
+</body>
+</html>
