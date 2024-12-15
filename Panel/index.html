@@ -109,10 +109,9 @@
             transform: translateY(-5px);
         }
 
-        .video-item iframe {
+        .video-item video {
             width: 100%;
             height: 300px;
-            border: none;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
         }
@@ -169,7 +168,7 @@
                 font-size: 14px;
             }
 
-            .video-item iframe {
+            .video-item video {
                 height: 200px;
             }
         }
@@ -189,12 +188,12 @@
     <div id="admin-panel">
         <h2>Panel de Administración</h2>
         <form id="admin-form">
-            <input type="text" id="youtube-link" placeholder="Enlace de YouTube" required>
+            <input type="file" id="video-file" accept="video/*" required>
             <input type="text" id="download-link" placeholder="Enlace de Descarga" required>
             <textarea id="description" placeholder="Descripción opcional del video" rows="3"></textarea>
             <button type="submit">Agregar Video</button>
         </form>
-        <p id="validation-error">⚠️ Por favor, ingresa un enlace válido de YouTube.</p>
+        <p id="validation-error">⚠️ Por favor, ingresa un enlace válido de descarga.</p>
     </div>
 
     <!-- Public Video List -->
@@ -223,26 +222,26 @@
         document.getElementById('admin-form').addEventListener('submit', (event) => {
             event.preventDefault();
 
-            const youtubeLink = document.getElementById('youtube-link').value;
+            const videoFile = document.getElementById('video-file').files[0];
             const downloadLink = document.getElementById('download-link').value;
             const description = document.getElementById('description').value;
             const validationError = document.getElementById('validation-error');
 
-            const videoId = extractYouTubeID(youtubeLink);
-
-            if (videoId) {
+            if (videoFile && downloadLink) {
                 validationError.style.display = 'none';
 
                 const videos = JSON.parse(localStorage.getItem('videos')) || [];
 
-                if (!videos.some(video => video.youtubeId === videoId && video.downloadLink === downloadLink)) {
-                    videos.push({ youtubeId: videoId, downloadLink, description });
-                    localStorage.setItem('videos', JSON.stringify(videos));
-                    document.getElementById('admin-form').reset();
-                    loadVideos();
-                } else {
-                    validationError.style.display = 'block';
-                }
+                const videoData = {
+                    file: URL.createObjectURL(videoFile),
+                    downloadLink,
+                    description
+                };
+
+                videos.push(videoData);
+                localStorage.setItem('videos', JSON.stringify(videos));
+                document.getElementById('admin-form').reset();
+                loadVideos();
             } else {
                 validationError.style.display = 'block';
             }
@@ -257,9 +256,9 @@
                 const videoItem = document.createElement('div');
                 videoItem.classList.add('video-item');
 
-                const iframe = document.createElement('iframe');
-                iframe.src = `https://www.youtube.com/embed/${video.youtubeId}`;
-                iframe.allowFullscreen = true;
+                const videoElement = document.createElement('video');
+                videoElement.src = video.file;
+                videoElement.controls = true;
 
                 const downloadAnchor = document.createElement('a');
                 downloadAnchor.href = video.downloadLink;
@@ -279,10 +278,9 @@
                 deleteButton.classList.add('delete-button');
                 deleteButton.onclick = () => deleteVideo(index);
 
-                videoItem.appendChild(iframe);
+                videoItem.appendChild(videoElement);
                 videoItem.appendChild(downloadAnchor);
                 videoItem.appendChild(deleteButton);
-
                 videosContainer.appendChild(videoItem);
             });
         }
@@ -292,12 +290,6 @@
             videos.splice(index, 1);
             localStorage.setItem('videos', JSON.stringify(videos));
             loadVideos();
-        }
-
-        function extractYouTubeID(url) {
-            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-            const match = url.match(regex);
-            return match ? match[1] : null;
         }
     </script>
 </body>
