@@ -1,3 +1,4 @@
+<html><head><base href=""/>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -90,6 +91,12 @@
             text-decoration: underline;
         }
 
+        .description-text {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+
         .delete-button {
             position: absolute;
             top: 5px;
@@ -139,6 +146,7 @@
         <form id="admin-form">
             <input type="text" id="youtube-link" placeholder="Enlace de YouTube" required>
             <input type="text" id="download-link" placeholder="Enlace de Descarga" required>
+            <input type="text" id="description" placeholder="Descripción opcional del video">
             <button type="submit">Agregar Video</button>
         </form>
         <p id="validation-error">⚠️ Por favor, ingresa un enlace válido de YouTube.</p>
@@ -176,6 +184,7 @@
 
             const youtubeLink = document.getElementById('youtube-link').value;
             const downloadLink = document.getElementById('download-link').value;
+            const description = document.getElementById('description').value;
             const validationError = document.getElementById('validation-error');
 
             // Extract the YouTube video ID
@@ -190,7 +199,7 @@
                 // Check if the video already exists
                 if (!videos.some(video => video.youtubeId === videoId && video.downloadLink === downloadLink)) {
                     // Add new video to the list
-                    videos.push({ youtubeId: videoId, downloadLink });
+                    videos.push({ youtubeId: videoId, downloadLink, description });
 
                     // Save updated list to localStorage
                     localStorage.setItem('videos', JSON.stringify(videos));
@@ -230,6 +239,14 @@
                 downloadAnchor.textContent = "Descargar archivo";
                 downloadAnchor.classList.add('download-link');
                 downloadAnchor.target = "_blank";
+
+                // Create and append the description text
+                if (video.description) {
+                    const descriptionText = document.createElement('p');
+                    descriptionText.textContent = video.description;
+                    descriptionText.classList.add('description-text');
+                    videoItem.appendChild(descriptionText);
+                }
 
                 // Create the delete button
                 const deleteButton = document.createElement('button');
